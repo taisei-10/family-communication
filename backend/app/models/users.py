@@ -24,5 +24,6 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # リレーション: 所属する家族
+    # リレーション
     family = relationship("Family", back_populates="members")
+    schedules = relationship("Schedule", back_populates="user")

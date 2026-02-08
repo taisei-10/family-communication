@@ -19,3 +19,4 @@ class Family(Base):
     
     # リレーション: この家族に所属するメンバー
     members = relationship("User", back_populates="family")
+    schedules = relationship("Schedule", back_populates="family")
