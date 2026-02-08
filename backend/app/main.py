@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.models import users
-from app.routers import auth, users
+from app.models import users, family
+from app.routers import auth, users, families
 
 # データベースのテーブルを作成
 Base.metadata.create_all(bind=engine)
@@ -15,7 +15,7 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(users.router)
-
+app.include_router(families.router)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Family Communication API"}
