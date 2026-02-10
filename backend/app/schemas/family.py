@@ -28,6 +28,7 @@ class FamilyResponse(BaseModel):
     """
     id: int
     name: str
+    invite_code: str
     created_at: datetime
     members: List[FamilyMemberResponse] = []
     

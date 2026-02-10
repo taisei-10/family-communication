@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+import secrets
 
 from app.database import get_db
 from app.models.users import User
@@ -31,8 +32,14 @@ def create_family(
             detail="既に家族グループに所属しています"
         )
     
+    # 招待コードを生成（8文字のランダム文字列）
+    invite_code = secrets.token_urlsafe(6)
+    
     # 家族グループを作成
-    new_family = Family(name=family.name)
+    new_family = Family(
+        name=family.name,
+        invite_code=invite_code
+    )
     db.add(new_family)
     db.commit()
     db.refresh(new_family)
@@ -65,6 +72,37 @@ def get_my_family(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="家族グループが見つかりません"
         )
+    
+    return family
+
+@router.post("/join/{invite_code}", response_model=FamilyResponse)
+def join_family_by_invite_code(
+    invite_code: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    招待コードで家族グループに参加
+    """
+    # 既に家族に所属している場合はエラー
+    if current_user.family_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="既に家族グループに所属しています"
+        )
+    
+    # 招待コードで家族を検索
+    family = db.query(Family).filter(Family.invite_code == invite_code).first()
+    if not family:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="招待コードが無効です"
+        )
+    
+    # 家族に参加
+    current_user.family_id = family.id
+    db.commit()
+    db.refresh(family)
     
     return family
 

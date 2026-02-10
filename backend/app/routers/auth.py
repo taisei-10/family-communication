@@ -33,13 +33,14 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="このユーザー名は既に使用されています"
         )
     
-    # メールアドレスが既に存在するかチェック
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="このメールアドレスは既に使用されています"
-        )
+    # メールアドレスが提供されている場合のみ重複チェック
+    if user.email:
+        db_user = db.query(User).filter(User.email == user.email).first()
+        if db_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="このメールアドレスは既に使用されています"
+            )
     
     # パスワードをハッシュ化
     hashed_password = get_password_hash(user.password)

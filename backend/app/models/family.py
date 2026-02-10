@@ -12,6 +12,7 @@ class Family(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)  # 家族名
+    invite_code = Column(String, unique=True, index=True, nullable=False)  # 招待コード
     
     # タイムスタンプ
     created_at = Column(DateTime(timezone=True), server_default=func.now())
