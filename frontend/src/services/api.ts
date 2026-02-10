@@ -1,30 +1,38 @@
 import axios from 'axios';
 
-// バックエンドのURL
-const API_BASE_URL = 'http://localhost:8000';
-
-// axiosのインスタンスを作成
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// リクエストの前に実行される処理
+// リクエストインターセプター（送信前にログ出力）
 api.interceptors.request.use(
   (config) => {
-    // ローカルストレージからトークンを取得
-    const token = localStorage.getItem('access_token');
+    console.log(`[API REQUEST] ${config.method?.toUpperCase()} ${config.url}`, config.data);
     
     // トークンがあればヘッダーに追加
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
+    console.error('[API REQUEST ERROR]', error);
+    return Promise.reject(error);
+  }
+);
+
+// レスポンスインターセプター（受信後にログ出力）
+api.interceptors.response.use(
+  (response) => {
+    console.log(`[API RESPONSE] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    return response;
+  },
+  (error) => {
+    console.error('[API RESPONSE ERROR]', error.response?.status, error.response?.data);
     return Promise.reject(error);
   }
 );

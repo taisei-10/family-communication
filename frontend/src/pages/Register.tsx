@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/auth';
+import { register } from '../services/auth';
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -15,17 +18,24 @@ function Login() {
     setError('');
     setLoading(true);
 
-    console.log('[LOGIN] ログイン試行:', { username });
+    const payload = {
+      username,
+      email: email || undefined,
+      password,
+      full_name: fullName || undefined,
+    };
+
+    console.log('[REGISTER] 登録試行:', { username, email, full_name: fullName });
 
     try {
-      await login({ username, password });
-      console.log('[LOGIN] ログイン成功');
-      navigate('/');
+      await register(payload);
+      console.log('[REGISTER] 登録成功');
+      navigate('/login');
     } catch (err: any) {
-      console.error('[LOGIN] ログイン失敗:', err);
-      console.error('[LOGIN] エラーレスポンス:', err.response?.data);
+      console.error('[REGISTER] 登録失敗:', err);
+      console.error('[REGISTER] エラーレスポンス:', err.response?.data);
       
-      const errorMessage = err.response?.data?.detail || err.message || 'ログインに失敗しました';
+      const errorMessage = err.response?.data?.detail || err.message || '登録に失敗しました';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -34,7 +44,7 @@ function Login() {
 
   return (
     <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h2>ログイン</h2>
+      <h2>新規登録</h2>
       
       {error && (
         <div style={{ 
@@ -51,7 +61,7 @@ function Login() {
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
-            ユーザー名
+            ユーザー名（半角英数字）*
           </label>
           <input
             type="text"
@@ -67,15 +77,50 @@ function Login() {
           />
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
-            パスワード
+            メールアドレス
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>
+            パスワード（8文字以上）*
           </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={8}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>
+            氏名
+          </label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
             style={{
               width: '100%',
               padding: '8px',
@@ -98,25 +143,25 @@ function Login() {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? 'ログイン中...' : 'ログイン'}
+          {loading ? '登録中...' : '登録'}
         </button>
       </form>
 
       <p style={{ marginTop: '20px', textAlign: 'center' }}>
-        アカウントをお持ちでないですか？{' '}
+        すでにアカウントをお持ちですか？{' '}
         <a 
-          href="/register" 
+          href="/login" 
           style={{ color: '#1976d2' }}
           onClick={(e) => {
             e.preventDefault();
-            navigate('/register');
+            navigate('/login');
           }}
         >
-          新規登録
+          ログイン
         </a>
       </p>
     </div>
   );
 }
 
-export default Login;
+export default Register;

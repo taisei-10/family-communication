@@ -13,8 +13,9 @@ export interface User {
 export interface Family {
   id: number;
   name: string;
+  invite_code: string;
+  created_by: number;
   created_at: string;
-  members: User[];
 }
 
 // スケジュール型
@@ -60,4 +61,19 @@ export interface RegisterRequest {
 export interface TokenResponse {
   access_token: string;
   token_type: string;
+}
+
+// 家族作成リクエスト
+export interface FamilyCreateRequest {
+  name: string;
+}
+
+// 家族メンバー
+export interface FamilyMember {
+  id: number;
+  username: string;
+  email?: string;
+  full_name?: string;
+  family_id: number;
+  created_at: string;
 }
